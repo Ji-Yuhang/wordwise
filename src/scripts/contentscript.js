@@ -8,7 +8,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 
 // HTML tags that should not traversed
-const TAG_BLACKLIST = ['SCRIPT', 'RUBY', 'BUTTON', 'CANVAS', 'INPUT', 'TABLE'];
+const TAG_BLACKLIST = ['SCRIPT', 'RUBY', 'BUTTON', 'CANVAS', 'INPUT', 'TABLE', 'CODE', 'PRE'];
 const DEFINITION_MAX_CHARS = 20;
 const DIFFICULTY_THRESHOLD = 30;
 const ARTICLE_SELECTOR = ['p', 'article', '.article', 'section', '.articles', '.article-text', '.story-content'].join(', ');
@@ -89,9 +89,20 @@ window.onload = init;
 
 $(document).on('click', () => {
   let selection = window.getSelection();
+  console.log("selection",selection.anchorNode.tagName, selection.anchorNode.parentNode.tagName, selection);
+  if(TAG_BLACKLIST.some(tag => tag === selection.anchorNode.tagName || tag === selection.anchorNode.parentNode.tagName)) return;
 
   let word = selection.toString().trim();
+  // 不包含英文字符不处理
+  if (!word.match(/\w+/)) {
+    return;
+  } else {
+    // 替换所有非英文字符为空格
+    word = word.replace(/\W/g, ' ').trim();
+  }
+
   if (_.isEmpty(word)) return;
+
 
   console.log(word);
 
