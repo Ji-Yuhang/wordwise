@@ -6,6 +6,7 @@ import Lemmatizer from "./lemmatizer"
 
 import $ from 'jquery';
 import _ from 'lodash';
+import pluralize from 'pluralize';
 
 // HTML tags that should not traversed
 const TAG_BLACKLIST = ['SCRIPT', 'RUBY', 'BUTTON', 'CANVAS', 'INPUT', 'TABLE', 'CODE', 'PRE'];
@@ -85,12 +86,38 @@ const init = () => {
     $content.forEach(traverseAndAnnotate);
 }
 
+const stems = (word) => {
+  let words = [];
+  let singular_word = pluralize.singular(word);
+  console.log('singular_word:', word, singular_word);
+  words.push(singular_word);
+  return words;
+}
+
 window.onload = init;
 
+const parentNodesTagNames = (node)=>{
+  let current = node;
+  let tagNames = [];
+  while (!!current){
+    if (current.tagName){
+      tagNames.push(current.tagName);
+    }
+    current = current.parentNode;
+  }
+  return _.uniq(_.compact(tagNames));
+}
+const isParentIncludeBlackList = (node, tagName) => {
+  let tagNames = parentNodesTagNames(node);
+  //if(TAG_BLACKLIST.some(tag => tag === selection.anchorNode.tagName || tag === selection.anchorNode.parentNode.tagName)) return true;
+  return TAG_BLACKLIST.some(tag => _.includes(tagNames, tag));
+}
 $(document).on('click', () => {
   let selection = window.getSelection();
   console.log("selection",selection.anchorNode.tagName, selection.anchorNode.parentNode.tagName, selection);
-  if(TAG_BLACKLIST.some(tag => tag === selection.anchorNode.tagName || tag === selection.anchorNode.parentNode.tagName)) return;
+
+  // 祖先节点是否在黑名单当中
+  if (isParentIncludeBlackList(selection.anchorNode) || isParentIncludeBlackList(selection.focusNode)) return;
 
   let word = selection.toString().trim();
   // 不包含英文字符不处理
@@ -103,17 +130,22 @@ $(document).on('click', () => {
 
   if (_.isEmpty(word)) return;
 
+  // 拆分不同单词
+  let words = word.split(/\s+/);
+  let stem_words = _.flatten(words.map(w => stems(w)));
 
-  console.log(word);
+  console.log(word,words);
 
   //console.log(lemmatizer.lemmas(word), (lemma) => ignore[lemma[0]]);
+  stem_words.forEach(word => {
+    findAndReplaceDOMText(selection.anchorNode.parentElement, {
+      find: word,
+      replace: function (portion) {
+        let el = $(`<ruby class="annotation">${word}<rt>${getDefinition(word)}</rt></ruby>`);
+        return el[0];
+      }
+    });
 
-  findAndReplaceDOMText(selection.anchorNode.parentElement, {
-    find: word,
-    replace: function (portion) {
-      let el = $(`<ruby class="annotation">${word}<rt>${getDefinition(word)}</rt></ruby>`);
-      return el[0];
-    }
-  });
+  })
 
 });
