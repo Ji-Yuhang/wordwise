@@ -2,6 +2,7 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
+  target: "web",
   entry: path.resolve(__dirname, 'src', 'scripts', 'contentscript.js'),
   output: {
     path: path.resolve(__dirname, 'build'),
@@ -11,7 +12,7 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/,/utils/],
         loader: 'babel-loader'
       },
       {
@@ -20,6 +21,10 @@ module.exports = {
       }
     ]
   },
+  // 排除 `difficulty.js
+  externals: [
+    // /utils/,
+  ],
   plugins: [
     new CopyWebpackPlugin([
       { from: 'src/icons', to: 'icons' },

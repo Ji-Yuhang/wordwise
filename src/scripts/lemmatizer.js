@@ -109,7 +109,7 @@ Lemmatizer.prototype = {
     this.form = form;
 
     var parts = ['verb', 'noun', 'adj', 'adv'];
-    if ( pos && !_.include( parts, pos ) ) {
+    if ( pos && !_.includes( parts, pos ) ) {
       console.log("warning: pos must be 'verb' or 'noun' or 'adj' or 'adv'.");
       return;
     }
@@ -121,7 +121,7 @@ Lemmatizer.prototype = {
       // when lemma not found and the form is included in wordlists.
       if ( this.is_lemma_empty() ) {
         _.chain(parts)
-          .select( function(pos) { return self.wordlists[pos][form]; } )
+          .filter( function(pos) { return self.wordlists[pos][form]; } )
           .each( function(pos) { self.lems.push([ form, pos ]); } );
       }
       // when lemma not found and the form is not included in wordlists.
@@ -369,7 +369,7 @@ Lemmatizer.prototype = {
   },
 
   is_vowel: function(letter) {
-    return _.include(["a", "e", "i", "o", "u"], letter);
+    return _.includes(["a", "e", "i", "o", "u"], letter);
   },
 
   // [ ["leave", "verb"], ["leaf", "noun"], ["leave", "verb"], ["leave", "noun"] ];

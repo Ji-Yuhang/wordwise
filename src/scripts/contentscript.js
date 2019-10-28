@@ -14,7 +14,7 @@ const DEFINITION_MAX_CHARS = 20;
 const DIFFICULTY_THRESHOLD = 30;
 const ARTICLE_SELECTOR = ['p', 'article', '.article', 'section', '.articles', '.article-text', '.story-content'].join(', ');
 
-// var lemmatizer = new Lemmatizer();
+var lemmatizer = new Lemmatizer();
 
 const displayedDefinitions = {};
 
@@ -89,8 +89,11 @@ const init = () => {
 const stems = (word) => {
   let words = [];
   let singular_word = pluralize.singular(word);
-  console.log('singular_word:', word, singular_word);
+  let lemmas = _.uniq(_.flatten(lemmatizer.lemmas(word).map(pair=> pair[0])))
   words.push(singular_word);
+  words.concat(lemmas)
+  console.log('singular_word:', word, singular_word,lemmas, words);
+
   return words;
 }
 
@@ -132,9 +135,9 @@ $(document).on('click', () => {
 
   // 拆分不同单词
   let words = word.split(/\s+/);
-  let stem_words = _.flatten(words.map(w => stems(w)));
+  let stem_words = _.uniq(_.flatten(words.map(w => stems(w))));
 
-  console.log(word,words);
+  console.log(word,words,stem_words);
 
   //console.log(lemmatizer.lemmas(word), (lemma) => ignore[lemma[0]]);
   stem_words.forEach(word => {
