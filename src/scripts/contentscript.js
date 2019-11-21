@@ -123,6 +123,10 @@ $(document).on('click', () => {
   if (isParentIncludeBlackList(selection.anchorNode) || isParentIncludeBlackList(selection.focusNode)) return;
 
   let word = selection.toString().trim();
+  
+  // 域名不处理
+  if (word.includes("://")) return;
+
   // 不包含英文字符不处理
   if (!word.match(/\w+/)) {
     return;
